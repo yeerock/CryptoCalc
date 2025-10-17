@@ -1,0 +1,3174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto Profit Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    
+    <style>
+        [v-cloak] { display: none; }
+        
+        /* iOS System Font Stack */
+        * {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        /* Prevent iOS bounce and ensure full height */
+html, body {
+    height: 100%;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+    background: #000000;
+    top: 0;
+    left: 0;
+}
+
+#app {
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    background: #000000;
+}
+        
+        /* iOS Style Scrollbar */
+        ::-webkit-scrollbar { width: 0px; height: 0px; }
+        
+        /* iOS Card Style */
+        .ios-card {
+            background: #1C1C1E;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* iOS List Style */
+        .ios-list {
+            background: #1C1C1E;
+            border-radius: 10px;
+        }
+        
+        .ios-list-item {
+            padding: 11px 16px;
+            border-bottom: 0.5px solid #38383A;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 44px;
+        }
+        
+        .ios-list-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* iOS Toggle Switch */
+        .ios-switch {
+            position: relative;
+            width: 51px;
+            height: 31px;
+            background: #38383A;
+            border-radius: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .ios-switch.active {
+            background: #30D158;
+        }
+        
+        .ios-switch-thumb {
+            position: absolute;
+            width: 27px;
+            height: 27px;
+            background: white;
+            border-radius: 13.5px;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.15), 0 3px 1px 0 rgba(0, 0, 0, 0.06);
+        }
+        
+        .ios-switch.active .ios-switch-thumb {
+            transform: translateX(20px);
+        }
+        
+        /* iOS Segmented Control */
+        .ios-segment {
+            background: #1C1C1E;
+            padding: 2px;
+            border-radius: 9px;
+            display: inline-flex;
+        }
+        
+        .ios-segment-button {
+            padding: 6px 16px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #8E8E93;
+            transition: all 0.2s;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .ios-segment-button.active {
+            background: #636366;
+            color: white;
+        }
+        
+        /* iOS Input Style */
+        .ios-input {
+            background: #2C2C2E;
+            border: none;
+            border-radius: 10px;
+            padding: 11px 16px;
+            color: white;
+            font-size: 17px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .ios-input:focus {
+            background: #3A3A3C;
+        }
+        
+        .ios-input::placeholder {
+            color: #8E8E93;
+        }
+        
+        /* iOS Button Styles */
+        .ios-button {
+            border-radius: 10px;
+            padding: 11px 20px;
+            font-size: 17px;
+            font-weight: 600;
+            transition: opacity 0.2s;
+            border: none;
+            cursor: pointer;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .ios-button:active {
+            opacity: 0.7;
+        }
+        
+        .ios-button-primary {
+            background: #0A84FF;
+            color: white;
+        }
+        
+        .ios-button-success {
+            background: #30D158;
+            color: white;
+        }
+        
+        .ios-button-danger {
+            background: #FF453A;
+            color: white;
+        }
+        
+        .ios-button-secondary {
+            background: #48484A;
+            color: white;
+        }
+        
+        /* iOS Tab Bar */
+        .ios-tab-bar {
+            background: #1C1C1E;
+            border-top: 0.5px solid #38383A;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .ios-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            color: #8E8E93;
+            transition: color 0.2s;
+            cursor: pointer;
+            font-size: 10px;
+            gap: 4px;
+        }
+        
+        .ios-tab.active {
+            color: #0A84FF;
+        }
+        
+        /* iOS Navigation Bar */
+        .ios-navbar {
+            background: rgba(28, 28, 30, 0.95);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 0.5px solid #38383A;
+        }
+        
+        /* iOS Section Header */
+        .ios-section-header {
+            font-size: 13px;
+            font-weight: 400;
+            color: #8E8E93;
+            text-transform: uppercase;
+            letter-spacing: -0.08px;
+            padding: 6px 16px;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .ios-section-header-clickable {
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* iOS Modal */
+        .ios-modal {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        
+        .ios-modal-content {
+            background: #2C2C2E;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        
+        /* Value Colors */
+        .profit-value { color: #30D158; }
+        .loss-value { color: #FF453A; }
+        .neutral-value { color: #8E8E93; }
+        .myr-value { color: #FF9F0A; }
+        
+        /* Animations */
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(-100%); opacity: 0; }
+        }
+        
+        @keyframes expandHeight {
+            from { max-height: 0; opacity: 0; }
+            to { max-height: 1000px; opacity: 1; }
+        }
+        
+        @keyframes collapseHeight {
+            from { max-height: 1000px; opacity: 1; }
+            to { max-height: 0; opacity: 0; }
+        }
+        
+        .slide-up {
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .slide-down {
+            animation: slideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .slide-out {
+            animation: slideOut 0.3s ease-in;
+        }
+        
+        .expand-animation {
+            animation: expandHeight 0.3s ease-out;
+            overflow: hidden;
+        }
+        
+        .collapse-animation {
+            animation: collapseHeight 0.3s ease-out;
+            overflow: hidden;
+        }
+        
+        /* Price ticker style */
+.price-ticker {
+    background: linear-gradient(90deg, #0A84FF, #5E5CE6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Ensure digits inside price ticker are visible */
+.price-ticker .digit {
+    background: linear-gradient(90deg, #0A84FF, #5E5CE6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+        
+        /* Disable selection on non-input elements */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        input, textarea {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+        
+        /* Small text style */
+        .ios-caption {
+            font-size: 12px;
+            color: #8E8E93;
+        }
+        
+        /* iOS Action Sheet Style */
+        .ios-action-sheet {
+            background: #2C2C2E;
+            border-radius: 14px;
+            margin: 0 8px;
+            margin-bottom: calc(8px + env(safe-area-inset-bottom));
+        }
+        
+        .ios-action-item {
+            padding: 18px;
+            text-align: center;
+            font-size: 20px;
+            color: #0A84FF;
+            border-bottom: 0.5px solid #38383A;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .ios-action-item:active {
+            background: #3A3A3C;
+        }
+        
+        .ios-action-item:last-child {
+            border-bottom: none;
+        }
+        
+        .ios-action-item.destructive {
+            color: #FF453A;
+        }
+        
+        /* Result row styles */
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 0.5px solid #38383A;
+        }
+        
+        .result-row:last-child {
+            border-bottom: none;
+        }
+        
+        .result-label {
+            color: #8E8E93;
+            font-size: 15px;
+        }
+        
+        .result-value {
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: right;
+        }
+        
+        /* Loading indicator */
+        .ios-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(142, 142, 147, 0.3);
+            border-top-color: #8E8E93;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Exchange rate badge */
+        .exchange-rate-badge {
+            background: rgba(255, 159, 10, 0.15);
+            border: 1px solid rgba(255, 159, 10, 0.3);
+            border-radius: 8px;
+            padding: 6px 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+        }
+        
+        /* Sub header styles */
+        .sub-header {
+            background: rgba(28, 28, 30, 0.95);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 0.5px solid #38383A;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+/* Toast notification styles */
+.toast-notification {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 16px 24px; /* Increased padding */
+    border-radius: 12px;
+    font-size: 18px; /* Larger font */
+    font-weight: 700; /* Bolder text */
+    z-index: 9999;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6); /* Stronger shadow */
+    min-width: 250px; /* Wider notification */
+    text-align: center;
+}
+
+.toast-success {
+    background: rgba(48, 209, 88, 0.98); /* More opaque */
+    color: white;
+    border: 2px solid rgba(48, 209, 88, 1); /* Thicker border */
+}
+
+.toast-danger {
+    background: rgba(255, 69, 58, 0.98); /* More opaque */
+    color: white;
+    border: 2px solid rgba(255, 69, 58, 1); /* Thicker border */
+}
+        
+        .toast-info {
+            background: rgba(44, 44, 46, 0.95);
+            color: white;
+            border: 1px solid rgba(72, 72, 74, 1);
+        }
+        
+        /* Chevron icon rotation */
+        .chevron-icon {
+            transition: transform 0.3s ease;
+        }
+        
+        .chevron-icon.rotated {
+            transform: rotate(180deg);
+        }
+        
+        /* Compact profit badge */
+        .compact-profit-badge {
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+            
+@keyframes pulseScale {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.05); }
+}
+
+.toast-notification {
+    /* ... existing styles ... */
+    animation: slideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
+               pulseScale 0.5s ease-in-out 2; /* Pulse twice */
+}                  
+
+
+/* Compact dropdown in header */
+.ios-navbar select.ios-input {
+    background: rgba(44, 44, 46, 0.6);
+    padding: 4px 8px;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 70px;
+    border-radius: 8px;
+}          
+
+/* Gaming-style number animation */
+.digit {
+    display: inline-block;
+    position: relative;
+    transition: none;
+}
+
+.digit-changed {
+    animation: digitPop 0.35s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/*@keyframes digitPop {
+    0% {
+        transform: scale(1) rotateX(0deg);
+        opacity: 1;
+    }
+    40% {
+        transform: scale(1.4) rotateX(180deg);
+        opacity: 0.8;
+        filter: brightness(1.5) drop-shadow(0 0 8px currentColor);
+    }
+    60% {
+        transform: scale(1.2) rotateX(360deg);
+        opacity: 0.9;
+    }
+    100% {
+        transform: scale(1) rotateX(360deg);
+        opacity: 1;
+        filter: brightness(1);
+    }
+} */
+
+/* Alternative: Slot machine style (uncomment to use this instead) */
+
+@keyframes digitPop {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    30% {
+        transform: translateY(-20px) scale(1.3);
+        opacity: 0;
+        filter: blur(2px);
+    }
+    31% {
+        transform: translateY(20px) scale(0.8);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+
+/* Alternative: Neon glow pulse (uncomment to use this instead) */
+/*
+@keyframes digitPop {
+    0%, 100% {
+        transform: scale(1);
+        filter: brightness(1);
+        text-shadow: 0 0 5px currentColor;
+    }
+    50% {
+        transform: scale(1.25);
+        filter: brightness(1.8);
+        text-shadow: 
+            0 0 10px currentColor,
+            0 0 20px currentColor,
+            0 0 30px currentColor;
+    }
+}
+*/
+                                        
+    </style>
+</head>
+<body>
+
+<div id="app" v-cloak>
+<!-- iOS Navigation Bar -->
+<header class="ios-navbar sticky top-0 z-50 px-4 py-3">
+    <div class="flex items-center justify-between">
+        <!-- Left: Import Data Icon -->
+<button @click="scanQR" class="p-2">
+                                        
+                                          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+    </svg>
+                                        
+    
+</button>
+        
+        <!-- Center: Price -->
+        <div class="text-center flex-1">
+            <div class="text-2xl font-bold price-ticker">
+                {{ formatPrice(currentPrice) }}
+            </div>
+            <div class="ios-caption">
+                1 USD = RM {{ formatMYRRate(exchangeRate) }}
+                <span v-if="exchangeRateLastUpdate"> • {{ formatLastUpdate(exchangeRateLastUpdate) }}</span>
+            </div>
+        </div>
+        
+        <!-- Right: Export Data Icon -->
+<button @click="shareData" class="p-2">
+                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+    </svg>
+  
+</button>
+    </div>
+</header>
+
+    <!-- Main Content with Tabs -->
+<main class="pb-20" v-show="currentView === 'calculator'">
+    <!-- Home Tab Content -->
+    <div v-show="activeTab === 'home'">
+        <div class="sm:hidden">
+            <!-- Results Section -->
+<div class="ios-section-header">CALCULATION RESULTS</div>
+<div class="ios-card mx-4 p-4">
+    <!-- Buy Price -->
+    <div class="flex justify-between items-start py-2">
+        <span class="result-label">Average Buy Price</span>
+        <div class="text-right">
+            <div class="result-value">{{ formatPrice(calculations.avgPrice) }}</div>
+            
+        </div>
+    </div>
+    
+    <!-- Total Cost -->
+    <div class="flex justify-between items-start py-2 border-t border-gray-700">
+        <span class="result-label">Total Invested</span>
+        <div class="text-right">
+            <div class="result-value">${{ formatUSDT(calculations.totalUsdtSpent, 2) }}</div>
+                                        <div class="ios-caption loss-value mt-1">Including ${{ formatUSDT(calculations.totalBuyFeeUSDT, 2) }} Fee</div>
+
+        </div>
+    </div>
+    
+    <!-- Coins Acquired -->
+    <div class="flex justify-between items-center py-2 border-t border-gray-700">
+        <span class="result-label">{{ selectedCoin }} Acquired</span>
+        <span class="result-value">₿{{ calculations.totalCoinsAcquired.toFixed(8) }}</span>
+    </div>
+    
+    <!-- Target Sell Price -->
+    <div class="flex justify-between items-start py-2 border-t border-gray-700">
+        <span class="result-label">Target Selling Price</span>
+        <div class="text-right">
+            <div class="result-value">{{ formatPrice(sellPrice || 0) }}</div>
+            <div class="ios-caption loss-value mt-1">- ${{ formatUSDT(calculations.sellFeeUSDT, 2) }}  Fee</div>
+        </div>
+    </div>
+    
+    <!-- Net USDT -->
+    <div class="flex justify-between items-start py-2 border-t border-gray-700">
+        <span class="result-label">Net USDT</span>
+        <div class="text-right">
+            <div class="result-value">${{ formatUSDT(calculations.finalUSDT, 2) }}</div>
+<div class="ios-caption neutral-value mt-1">- ${{ formatUSDT(calculations.totalUsdtSpent, 2) }} Invested</div>
+        </div>
+    </div>
+    
+    <!-- Net Profit -->
+    <div class="flex justify-between items-start py-3 border-t-2 border-gray-600 mt-2">
+        <span class="text-white font-semibold text-base">Net Profit</span>
+        <div class="text-right">
+            <div :class="['text-xl font-bold mb-1', 
+                       calculations.profitUSDT >= 0 ? 'profit-value' : 'loss-value']">
+                {{ calculations.profitUSDT >= 0 ? '+' : '' }}${{ formatUSDT(calculations.profitUSDT, 2) }}
+            </div>
+            <div class="ios-caption myr-value font-semibold">
+                {{ calculations.profitUSDT >= 0 ? '+' : '' }}RM {{ formatMYR(calculations.profitUSDT, 2) }}
+            </div>
+            <div :class="['text-sm font-semibold mt-1', 
+                       calculations.profitUSDT >= 0 ? 'profit-value' : 'loss-value']">
+                {{ calculations.profitUSDT >= 0 ? '+' : '' }}{{ calculations.profitPercent.toFixed(2) }}%
+            </div>
+        </div>
+    </div>
+</div>
+            
+          <!-- Chart Section -->
+<div class="ios-section-header">PROFIT CHART</div>
+<div class="ios-card mx-4 p-4">
+    <div class="flex justify-between items-center mb-3">
+        <select v-model="selectedTimeRange" 
+                @change="updateChartForTimeRange"
+                class="ios-input py-1 px-2 text-sm">
+            <option value="5m">5 min</option>
+            <option value="15m">15 min</option>
+            <option value="30m">30 min</option>
+            <option value="1h">1 hour</option>
+            <option value="4h">4 hours</option>
+            <option value="1d">1 day</option>
+            <option value="7d">7 days</option>
+        </select>
+        <button @click="resetChartData" 
+                class="ios-button ios-button-secondary py-1 px-3 text-sm">
+            Reset
+        </button>
+    </div>
+    <div style="position: relative; height: 200px;">
+        <canvas id="profitChartMobile"></canvas>
+    </div>
+    
+<!-- Market Pressure Section -->
+<div class="mt-4 pt-4 border-t border-gray-700">
+    <div class="text-xs text-gray-400 mb-2 text-center">Market Pressure (Real-time)</div>
+    <div class="flex gap-2 items-center">
+        <div class="flex-1">
+            <div class="flex justify-between text-xs mb-1">
+                <span class="text-green-400">Buy</span>
+                <span class="text-green-400 font-semibold">{{ buyPressure.toFixed(1) }}%</span>
+            </div>
+            <div class="h-2 bg-gray-800 rounded-full overflow-hidden">
+                <div class="h-full bg-green-500 transition-all duration-1000 ease-in-out" 
+                     :style="{ width: buyPressure + '%' }"></div>
+            </div>
+        </div>
+        <div class="flex-1">
+            <div class="flex justify-between text-xs mb-1">
+                <span class="text-red-400">Sell</span>
+                <span class="text-red-400 font-semibold">{{ sellPressure.toFixed(1) }}%</span>
+            </div>
+            <div class="h-2 bg-gray-800 rounded-full overflow-hidden">
+                <div class="h-full bg-red-500 transition-all duration-1000 ease-in-out" 
+                     :style="{ width: sellPressure + '%' }"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+                                        </div>
+
+        <!-- Desktop View for Home -->
+        <div class="hidden sm:grid lg:grid-cols-2 gap-6 p-6">
+            <!-- Results -->
+<div class="ios-card p-6">
+    <h2 class="text-xl font-semibold text-white mb-4">Calculation Results</h2>
+    
+    <div class="space-y-3">
+        <!-- Buy Price -->
+        <div class="flex justify-between items-start py-2">
+            <span class="result-label">Average Buying Price</span>
+            <div class="text-right">
+                <div class="result-value">{{ formatPrice(calculations.avgPrice) }}</div>
+                
+            </div>
+        </div>
+        
+        <!-- Total Cost -->
+        <div class="flex justify-between items-start py-2 border-t border-gray-700">
+            <span class="result-label">Total Invested</span>
+            <div class="text-right">
+                <div class="result-value">${{ formatUSDT(calculations.totalUsdtSpent, 2) }}</div>
+<div class="ios-caption loss-value mt-1">Including ${{ formatUSDT(calculations.totalBuyFeeUSDT, 2) }} Fee</div>
+
+                                        
+            </div>
+        </div>
+        
+        <!-- Coins Acquired -->
+        <div class="flex justify-between items-center py-2 border-t border-gray-700">
+            <span class="result-label">{{ selectedCoin }} Acquired</span>
+            <span class="result-value">₿{{ calculations.totalCoinsAcquired.toFixed(8) }}</span>
+        </div>
+        
+        <!-- Target Sell Price -->
+<div class="flex justify-between items-start py-2 border-t border-gray-700">
+    <span class="result-label">Target Selling Price</span>
+    <div class="text-right">
+        <div class="result-value">{{ formatPrice(sellPrice || 0) }}</div>
+        <div class="ios-caption loss-value mt-1">- ${{ formatUSDT(calculations.sellFeeUSDT, 2) }} Fee</div>
+    </div>
+</div>
+        
+        <!-- Net USDT -->
+        <div class="flex justify-between items-start py-2 border-t border-gray-700">
+            <span class="result-label">Net USDT</span>
+            <div class="text-right">
+                <div class="result-value">${{ formatUSDT(calculations.finalUSDT, 2) }}</div>
+<div class="ios-caption neutral-value mt-1">- ${{ formatUSDT(calculations.totalUsdtSpent, 2) }} Invested</div>
+            </div>
+        </div>
+        
+        <!-- Net Profit -->
+        <div class="flex justify-between items-start py-3 border-t-2 border-gray-600 mt-3">
+            <span class="text-lg font-semibold text-white">Net Profit</span>
+            <div class="text-right">
+                <div :class="['text-2xl font-bold mb-1', 
+                           calculations.profitUSDT >= 0 ? 'profit-value' : 'loss-value']">
+                    {{ calculations.profitUSDT >= 0 ? '+' : '' }}${{ formatUSDT(calculations.profitUSDT, 2) }}
+                </div>
+                <div class="ios-caption myr-value font-semibold text-base">
+                    {{ calculations.profitUSDT >= 0 ? '+' : '' }}RM {{ formatMYR(calculations.profitUSDT, 2) }}
+                </div>
+                <div :class="['text-base font-semibold mt-1', 
+                           calculations.profitUSDT >= 0 ? 'profit-value' : 'loss-value']">
+                    {{ calculations.profitUSDT >= 0 ? '+' : '' }}{{ calculations.profitPercent.toFixed(2) }}%
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+            <!-- Chart -->
+<div class="ios-card p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold text-white">Profit Chart</h2>
+        <div class="flex gap-2">
+            <select v-model="selectedTimeRange" 
+                    @change="updateChartForTimeRange"
+                    class="ios-input py-1 px-3 text-sm">
+                <option value="5m">5 min</option>
+                <option value="15m">15 min</option>
+                <option value="30m">30 min</option>
+                <option value="1h">1 hour</option>
+                <option value="4h">4 hours</option>
+                <option value="1d">1 day</option>
+                <option value="7d">7 days</option>
+            </select>
+            <button @click="resetChartData" 
+                    class="ios-button ios-button-secondary py-1 px-3 text-sm">
+                Reset
+            </button>
+        </div>
+    </div>
+    <div style="position: relative; height: 300px;">
+        <canvas id="profitChart"></canvas>
+    </div>
+    
+<!-- Market Pressure Section -->
+<div class="mt-4 pt-4 border-t border-gray-700">
+    <div class="text-sm text-gray-400 mb-3">Market Pressure (Real-time)</div>
+    <div class="flex gap-4">
+        <div class="flex-1">
+            <div class="flex justify-between text-sm mb-2">
+                <span class="text-green-400 font-semibold">Buy Pressure</span>
+                <span class="text-green-400 font-bold">{{ buyPressure.toFixed(1) }}%</span>
+            </div>
+            <div class="h-3 bg-gray-800 rounded-full overflow-hidden">
+                <div class="h-full bg-green-500 transition-all duration-1000 ease-in-out" 
+                     :style="{ width: buyPressure + '%' }"></div>
+            </div>
+        </div>
+        <div class="flex-1">
+            <div class="flex justify-between text-sm mb-2">
+                <span class="text-red-400 font-semibold">Sell Pressure</span>
+                <span class="text-red-400 font-bold">{{ sellPressure.toFixed(1) }}%</span>
+            </div>
+            <div class="h-3 bg-gray-800 rounded-full overflow-hidden">
+                <div class="h-full bg-red-500 transition-all duration-1000 ease-in-out" 
+                     :style="{ width: sellPressure + '%' }"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+        </div>
+    </div>
+
+    <!-- Buy Orders Tab Content -->
+<div v-show="activeTab === 'buy'">
+    <div class="sm:hidden">
+        <div class="ios-section-header ios-section-header-clickable" @click="toggleBuySection">
+            <span>BUY ORDERS</span>
+            <svg :class="['w-5 h-5 chevron-icon', showBuySection ? 'rotated' : '']" 
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </div>
+        
+        <div v-show="showBuySection">
+            <div class="ios-list mx-4">
+                <div class="ios-list-item">
+                    <span class="text-white">Real-time Price</span>
+                    <button @click="toggleRealTimeBuy" 
+                            :class="['ios-switch', useRealTimeBuy ? 'active' : '']">
+                        <div class="ios-switch-thumb"></div>
+                    </button>
+                </div>
+                <div class="ios-list-item">
+                    <span class="text-white">Buy Fee</span>
+                    <span class="text-gray-400 font-semibold">{{ buyFeePercent }}%</span>
+                </div>
+            </div>
+            
+            <div class="mx-4 mt-3 space-y-3">
+                <div v-for="(entry, index) in buyEntries" :key="entry.id">
+                    <!-- Entry Input Row -->
+                    <div class="flex gap-1">
+                        <input type="number" 
+                               v-model="entry.price"
+                               :disabled="useRealTimeBuy"
+                               placeholder="Price"
+                               step="0.00000001"
+                               @input="calculate"
+                               class="ios-input flex-1 min-w-0">
+                        <input type="number" 
+                               v-model="entry.usdt"
+                               placeholder="USDT"
+                               step="0.00000001"
+                               @input="calculate"
+                               class="ios-input flex-1 min-w-0">
+                        <button v-if="buyEntries.length > 1"
+                                @click="removeBuyEntry(entry.id)"
+                                class="ios-button ios-button-danger px-2 flex-shrink-0"
+                                style="min-width: 36px; width: 36px;">
+                            ×
+                        </button>
+                    </div>
+                    
+                    <!-- Entry Details Card -->
+                    <div v-if="entry.calculatedCoins > 0" 
+                         class="ios-card p-3 mt-1 text-xs space-y-2">
+                        <div class="flex justify-between">
+                            <span class="ios-caption">USDT Invested</span>
+                            <span class="text-white font-semibold">${{ formatUSDT(entry.usdt) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="ios-caption">Buy Fee ({{ buyFeePercent }}%)</span>
+                            <span class="loss-value font-semibold">-${{ formatUSDT(entry.calculatedFee) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="ios-caption">{{ selectedCoin }} Before Fee</span>
+                            <span class="text-gray-400 font-mono text-xs">{{ entry.calculatedCoins.toFixed(8) }}</span>
+                        </div>
+                        <div class="flex justify-between pt-2 border-t border-gray-700">
+                            <span class="text-white font-semibold">{{ selectedCoin }} After Fee</span>
+                            <span class="profit-value font-semibold font-mono">{{ entry.calculatedCoinsAfterFee.toFixed(8) }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button @click="addBuyEntry" 
+                        class="ios-button ios-button-secondary w-full">
+                    + Add Order
+                </button>
+            </div>
+            
+            <!-- Detailed Summary Card -->
+            <div v-if="showAveragePrice" class="ios-card mx-4 mt-3 p-4 mb-3">
+                <div class="text-xs text-gray-400 mb-3 text-center font-semibold uppercase">Buy Orders Summary</div>
+                
+                <!-- USDT Breakdown -->
+                <div class="space-y-2 mb-3 pb-3 border-b border-gray-700">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400 text-sm">Total USDT Invested</span>
+                        <span class="text-white font-bold text-base">${{ formatUSDT(calculations.totalUsdtSpent) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400 text-sm">Total Buy Fees</span>
+                        <span class="loss-value font-bold text-base">-${{ formatUSDT(calculations.totalBuyFeeUSDT) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="ios-caption">Fee in MYR</span>
+                        <span class="myr-value font-semibold">-RM {{ formatMYR(calculations.totalBuyFeeUSDT) }}</span>
+                    </div>
+                </div>
+                
+                <!-- Price & Coins -->
+                <div class="space-y-2 mb-3 pb-3 border-b border-gray-700">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400 text-sm">Average Buy Price</span>
+                        <span class="price-ticker font-bold text-base">{{ formatPrice(calculations.avgPrice) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-400 text-sm">Total {{ selectedCoin }} Acquired</span>
+                        <span class="profit-value font-bold text-base font-mono">{{ calculations.totalCoinsAcquired.toFixed(8) }}</span>
+                    </div>
+                </div>
+                
+                <!-- Additional Stats -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="ios-caption">Active Orders</span>
+                        <span class="text-white font-semibold">{{ buyEntries.filter(e => parseFloat(e.usdt) > 0).length }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="ios-caption">Total Investment (MYR)</span>
+                        <span class="myr-value font-semibold">RM {{ formatMYR(calculations.totalUsdtSpent) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="ios-caption">Cost Per {{ selectedCoin }}</span>
+                        <span class="text-white font-semibold">{{ formatPrice(calculations.avgPrice) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop View for Buy Orders -->
+    <div class="hidden sm:block p-6">
+        <div class="ios-card p-6 max-w-4xl mx-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-white">Buy Orders</h2>
+                <div class="flex items-center gap-4">
+                    <div class="text-sm text-gray-400">
+                        Buy Fee: <span class="text-white font-semibold">{{ buyFeePercent }}%</span>
+                    </div>
+                    <label class="flex items-center gap-2">
+                        <span class="text-sm text-gray-400">Real-time</span>
+                        <button @click="toggleRealTimeBuy" 
+                                :class="['ios-switch', useRealTimeBuy ? 'active' : '']">
+                            <div class="ios-switch-thumb"></div>
+                        </button>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <div v-for="(entry, index) in buyEntries" :key="entry.id">
+                    <!-- Entry Input Row -->
+                    <div class="flex gap-2">
+                        <div class="flex-1">
+                            <input type="number" 
+                                   v-model="entry.price"
+                                   :disabled="useRealTimeBuy"
+                                   placeholder="Price"
+                                   step="0.00000001"
+                                   @input="calculate"
+                                   class="ios-input w-full">
+                        </div>
+                        <div class="flex-1">
+                            <input type="number" 
+                                   v-model="entry.usdt"
+                                   placeholder="USDT"
+                                   step="0.00000001"
+                                   @input="calculate"
+                                   class="ios-input w-full">
+                        </div>
+                        <button v-if="buyEntries.length > 1"
+                                @click="removeBuyEntry(entry.id)"
+                                class="ios-button ios-button-danger">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Entry Details -->
+                    <div v-if="entry.calculatedCoins > 0" 
+                         class="ml-2 p-4 bg-black/30 rounded-lg mt-2">
+                        <div class="grid grid-cols-4 gap-4 text-sm">
+                            <div>
+                                <div class="ios-caption mb-1">USDT Invested</div>
+                                <div class="text-white font-bold">${{ formatUSDT(entry.usdt) }}</div>
+                            </div>
+                            <div>
+                                <div class="ios-caption mb-1 loss-value">Buy Fee ({{ buyFeePercent }}%)</div>
+                                <div class="loss-value font-bold">-${{ formatUSDT(entry.calculatedFee) }}</div>
+                            </div>
+                            <div>
+                                <div class="ios-caption mb-1">{{ selectedCoin }} Before Fee</div>
+                                <div class="text-gray-400 font-mono text-xs">{{ entry.calculatedCoins.toFixed(8) }}</div>
+                            </div>
+                            <div>
+                                <div class="ios-caption mb-1">{{ selectedCoin }} After Fee</div>
+                                <div class="profit-value font-bold font-mono text-xs">{{ entry.calculatedCoinsAfterFee.toFixed(8) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button @click="addBuyEntry" 
+                    class="ios-button ios-button-secondary w-full mt-4">
+                + Add Entry
+            </button>
+            
+            <!-- Detailed Summary -->
+            <div v-if="showAveragePrice" class="mt-6 p-6 bg-black/30 rounded-lg">
+                <div class="text-base text-gray-400 mb-4 font-semibold uppercase">Buy Orders Summary</div>
+                
+                <div class="grid grid-cols-3 gap-6 mb-4 pb-4 border-b border-gray-700">
+                    <!-- USDT Column -->
+                    <div>
+                        <div class="text-xs text-gray-500 mb-3 uppercase font-semibold">USDT Details</div>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="ios-caption mb-1">Total Invested</div>
+                                <div class="text-white font-bold text-xl">${{ formatUSDT(calculations.totalUsdtSpent) }}</div>
+                            </div>
+                            <div>
+                                <div class="ios-caption mb-1">Total Fees</div>
+                                <div class="loss-value font-bold text-lg">-${{ formatUSDT(calculations.totalBuyFeeUSDT) }}</div>
+                            </div>
+                            <div class="text-xs">
+                                <div class="ios-caption mb-1">Fees in MYR</div>
+                                <div class="myr-value font-semibold">-RM {{ formatMYR(calculations.totalBuyFeeUSDT) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Price Column -->
+                    <div>
+                        <div class="text-xs text-gray-500 mb-3 uppercase font-semibold">Price Info</div>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="ios-caption mb-1">Average Buy Price</div>
+                                <div class="price-ticker font-bold text-xl">{{ formatPrice(calculations.avgPrice) }}</div>
+                            </div>
+                            <div>
+                                <div class="ios-caption mb-1">Active Orders</div>
+                                <div class="text-white font-bold text-lg">{{ buyEntries.filter(e => parseFloat(e.usdt) > 0).length }}</div>
+                            </div>
+                            <div class="text-xs">
+                                <div class="ios-caption mb-1">Total Investment (MYR)</div>
+                                <div class="myr-value font-semibold">RM {{ formatMYR(calculations.totalUsdtSpent) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Coins Column -->
+                    <div>
+                        <div class="text-xs text-gray-500 mb-3 uppercase font-semibold">{{ selectedCoin }} Acquired</div>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="ios-caption mb-1">Total {{ selectedCoin }}</div>
+                                <div class="profit-value font-bold text-xl font-mono">{{ calculations.totalCoinsAcquired.toFixed(8) }}</div>
+                            </div>
+                            <div>
+                                <div class="ios-caption mb-1">Before Fees</div>
+                                <div class="text-gray-400 font-mono text-sm">{{ calculations.totalCoinsBeforeFee.toFixed(8) }}</div>
+                            </div>
+                            <div class="text-xs">
+                                <div class="ios-caption mb-1">Cost Per {{ selectedCoin }}</div>
+                                <div class="text-white font-semibold">{{ formatPrice(calculations.avgPrice) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bottom Summary -->
+                <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div class="text-center p-3 bg-black/40 rounded-lg">
+                        <div class="ios-caption mb-1">Effective Cost</div>
+                        <div class="text-white font-bold text-lg">${{ formatUSDT(calculations.totalUsdtSpent) }}</div>
+                        <div class="ios-caption myr-value mt-1">RM {{ formatMYR(calculations.totalUsdtSpent) }}</div>
+                    </div>
+                    <div class="text-center p-3 bg-black/40 rounded-lg">
+                        <div class="ios-caption mb-1">{{ selectedCoin }} Holdings</div>
+                        <div class="profit-value font-bold text-lg font-mono">{{ calculations.totalCoinsAcquired.toFixed(8) }}</div>
+                        <div class="ios-caption mt-1">@ {{ formatPrice(calculations.avgPrice) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sell Order Tab Content -->
+<div v-show="activeTab === 'sell'">
+    <div class="sm:hidden">
+        <div class="ios-section-header">SELL ORDER</div>
+        
+        <div class="ios-list mx-4">
+            <div class="ios-list-item">
+                <span class="text-white">Real-time Price</span>
+                <button @click="toggleRealTimeSell" 
+                        :class="['ios-switch', useRealTimeSell ? 'active' : '']">
+                    <div class="ios-switch-thumb"></div>
+                </button>
+            </div>
+            <div class="ios-list-item">
+                <span class="text-white">Sell Fee</span>
+                <span class="text-gray-400 font-semibold">{{ sellFeePercent }}%</span>
+            </div>
+        </div>
+        
+        <div class="mx-4 mt-3">
+            <input type="number" 
+                   v-model="sellPrice"
+                   :disabled="useRealTimeSell"
+                   placeholder="Target Sell Price"
+                   step="0.00000001"
+                   @input="calculate"
+                   class="ios-input w-full">
+        </div>
+        
+        <!-- Sell Order Details -->
+        <div v-if="calculations.totalCoinsAcquired > 0" class="ios-card mx-4 mt-3 p-4 mb-3">
+            <div class="text-xs text-gray-400 mb-3 text-center font-semibold uppercase">Sell Order Details</div>
+            
+            <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400 text-sm">{{ selectedCoin }} to Sell</span>
+                    <span class="text-white font-bold font-mono text-sm">{{ calculations.totalCoinsAcquired.toFixed(8) }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center pt-2 border-t border-gray-700">
+                    <span class="text-gray-400 text-sm">Sell Price</span>
+                    <span class="price-ticker font-bold text-base">{{ formatPrice(sellPrice) }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400 text-sm">Gross USDT</span>
+                    <span class="text-white font-semibold">${{ formatUSDT(calculations.coinOnHandSellValue) }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-400 text-sm">Sell Fee ({{ sellFeePercent }}%)</span>
+                    <span class="loss-value font-semibold">-${{ formatUSDT(calculations.sellFeeUSDT) }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center text-xs">
+                    <span class="ios-caption">Fee in MYR</span>
+                    <span class="myr-value font-semibold">-RM {{ formatMYR(calculations.sellFeeUSDT) }}</span>
+                </div>
+                
+                <div class="flex justify-between items-center pt-3 border-t-2 border-gray-600">
+                    <span class="text-white font-semibold">Net USDT After Sell</span>
+                    <div class="text-right">
+                        <div class="profit-value font-bold text-lg">${{ formatUSDT(calculations.finalUSDT) }}</div>
+                        <div class="ios-caption myr-value mt-1">RM {{ formatMYR(calculations.finalUSDT) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop View for Sell Order -->
+    <div class="hidden sm:block p-6">
+        <div class="ios-card p-6 max-w-2xl mx-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-white">Sell Order</h2>
+                <div class="flex items-center gap-4">
+                    <div class="text-sm text-gray-400">
+                        Sell Fee: <span class="text-white font-semibold">{{ sellFeePercent }}%</span>
+                    </div>
+                    <label class="flex items-center gap-2">
+                        <span class="text-sm text-gray-400">Real-time</span>
+                        <button @click="toggleRealTimeSell" 
+                                :class="['ios-switch', useRealTimeSell ? 'active' : '']">
+                            <div class="ios-switch-thumb"></div>
+                        </button>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <input type="number" 
+                       v-model="sellPrice"
+                       :disabled="useRealTimeSell"
+                       placeholder="Target Sell Price"
+                       step="0.00000001"
+                       @input="calculate"
+                       class="ios-input w-full text-lg">
+            </div>
+            
+            <!-- Sell Order Details -->
+            <div v-if="calculations.totalCoinsAcquired > 0" class="p-6 bg-black/30 rounded-lg">
+                <div class="text-base text-gray-400 mb-4 font-semibold uppercase">Sell Order Summary</div>
+                
+                <div class="grid grid-cols-2 gap-6 mb-4 pb-4 border-b border-gray-700">
+                    <div>
+                        <div class="text-xs text-gray-500 mb-3 uppercase font-semibold">Holdings</div>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="ios-caption mb-1">{{ selectedCoin }} to Sell</div>
+                                <div class="text-white font-bold text-xl font-mono">{{ calculations.totalCoinsAcquired.toFixed(8) }}</div>
+                            </div>
+                            <div>
+                                <div class="ios-caption mb-1">Sell Price</div>
+                                <div class="price-ticker font-bold text-xl">{{ formatPrice(sellPrice) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-xs text-gray-500 mb-3 uppercase font-semibold">USDT Details</div>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="ios-caption mb-1">Gross USDT</div>
+                                <div class="text-white font-bold text-xl">${{ formatUSDT(calculations.coinOnHandSellValue) }}</div>
+                            </div>
+                            <div>
+                                <div class="ios-caption mb-1">Sell Fee ({{ sellFeePercent }}%)</div>
+                                <div class="loss-value font-bold text-lg">-${{ formatUSDT(calculations.sellFeeUSDT) }}</div>
+                            </div>
+                            <div class="text-xs">
+                                <div class="ios-caption mb-1">Fee in MYR</div>
+                                <div class="myr-value font-semibold">-RM {{ formatMYR(calculations.sellFeeUSDT) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center p-4 bg-black/40 rounded-lg">
+                    <div class="ios-caption mb-2">Net USDT After Sell</div>
+                    <div class="profit-value font-bold text-3xl mb-2">${{ formatUSDT(calculations.finalUSDT) }}</div>
+                    <div class="ios-caption myr-value font-semibold text-base">RM {{ formatMYR(calculations.finalUSDT) }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                                        
+<!-- Settings Tab Content -->
+<div v-show="activeTab === 'settings'">
+    <div class="sm:hidden">
+        <!-- Coin Selection -->
+        <div class="ios-section-header">CRYPTOCURRENCY</div>
+        <div class="ios-list mx-4">
+            <div class="ios-list-item">
+                <span class="text-white">Selected Coin</span>
+                <select v-model="selectedCoin" 
+                        @change="selectCoin(selectedCoin)"
+                        class="ios-input py-2 px-3 text-sm">
+                    <option v-for="coin in coins" :key="coin" :value="coin">{{ coin }}</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Fee Settings -->
+        <div class="ios-section-header">TRADING FEES</div>
+        <div class="ios-list mx-4">
+            <div class="ios-list-item flex-col items-start">
+                <div class="flex justify-between w-full mb-2">
+                    <span class="text-white">Buy Fee</span>
+                    <span class="text-gray-400 font-semibold">{{ buyFeePercent }}%</span>
+                </div>
+                <input type="number" 
+                       v-model.number="buyFeePercent"
+                       @input="calculate"
+                       step="0.01"
+                       min="0"
+                       max="100"
+                       class="ios-input w-full">
+            </div>
+            
+            <div class="ios-list-item flex-col items-start">
+                <div class="flex justify-between w-full mb-2">
+                    <span class="text-white">Sell Fee</span>
+                    <span class="text-gray-400 font-semibold">{{ sellFeePercent }}%</span>
+                </div>
+                <input type="number" 
+                       v-model.number="sellFeePercent"
+                       @input="calculate"
+                       step="0.01"
+                       min="0"
+                       max="100"
+                       class="ios-input w-full">
+            </div>
+        </div>
+
+        <!-- Available USDT -->
+        <div class="ios-section-header">AVAILABLE FUNDS</div>
+        <div class="ios-list mx-4">
+            <div class="ios-list-item flex-col items-start">
+                <div class="flex justify-between w-full mb-2">
+                    <span class="text-white">Available USDT</span>
+                    <span class="text-gray-400 font-semibold">${{ formatUSDT(availableUSDT, 2) }}</span>
+                </div>
+                <input type="number" 
+                       v-model.number="availableUSDT"
+                       @input="calculate"
+                       step="0.01"
+                       min="0"
+                       placeholder="Enter USDT amount"
+                       class="ios-input w-full">
+                <div class="ios-caption mt-2">Used when no specific buy amounts are entered</div>
+            </div>
+        </div>
+
+        <!-- Price Alert -->
+        <div class="ios-section-header">PRICE ALERTS</div>
+        <div class="ios-list mx-4">
+            <div class="ios-list-item flex-col items-start">
+                <div class="flex justify-between w-full mb-2">
+                    <span class="text-white">Alert Threshold</span>
+                    <span class="text-gray-400 font-semibold">${{ priceThreshold }}</span>
+                </div>
+                <input type="number" 
+                       v-model.number="priceThreshold"
+                       step="100"
+                       min="1"
+                       placeholder="e.g., 500"
+                       class="ios-input w-full mb-2">
+                <button @click="savePriceThreshold" 
+                        class="ios-button ios-button-primary w-full">
+                    Save Threshold
+                </button>
+                <div class="ios-caption mt-2">Get notified when price crosses multiples of this amount</div>
+            </div>
+        </div>
+
+        <!-- Exchange Rate -->
+        <div class="ios-section-header">CURRENCY</div>
+        <div class="ios-card mx-4 p-4 mb-3">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-400 text-sm">Exchange Rate</span>
+                <span class="myr-value font-bold">1 USD = RM {{ formatMYRRate(exchangeRate) }}</span>
+            </div>
+            <div class="ios-caption">
+                Last updated: {{ formatLastUpdate(exchangeRateLastUpdate) }}
+            </div>
+        </div>
+
+        <!-- Data Management -->
+        <div class="ios-section-header">DATA</div>
+        <div class="mx-4 space-y-2 mb-3">
+            <button @click="saveData(true)" 
+                    class="ios-button ios-button-success w-full">
+                💾 Save Configuration
+            </button>
+            <button @click="loadData" 
+                    class="ios-button ios-button-primary w-full">
+                📂 Load Configuration
+            </button>
+            <button @click="resetChartData" 
+                    class="ios-button ios-button-danger w-full">
+                🗑️ Clear Chart Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Desktop View for Settings -->
+    <div class="hidden sm:block p-6">
+        <div class="max-w-4xl mx-auto space-y-6">
+            <!-- Coin Selection -->
+            <div class="ios-card p-6">
+                <h2 class="text-xl font-semibold text-white mb-4">Cryptocurrency</h2>
+                <div class="flex items-center gap-4">
+                    <label class="text-gray-400 text-sm flex-shrink-0">Selected Coin:</label>
+                    <select v-model="selectedCoin" 
+                            @change="selectCoin(selectedCoin)"
+                            class="ios-input py-2 px-4">
+                        <option v-for="coin in coins" :key="coin" :value="coin">{{ coin }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Fee Settings -->
+            <div class="ios-card p-6">
+                <h2 class="text-xl font-semibold text-white mb-4">Trading Fees</h2>
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-gray-400 text-sm mb-2 block">Buy Fee (%)</label>
+                        <input type="number" 
+                               v-model.number="buyFeePercent"
+                               @input="calculate"
+                               step="0.01"
+                               min="0"
+                               max="100"
+                               class="ios-input w-full">
+                        <div class="ios-caption mt-1">Current: {{ buyFeePercent }}%</div>
+                    </div>
+                    <div>
+                        <label class="text-gray-400 text-sm mb-2 block">Sell Fee (%)</label>
+                        <input type="number" 
+                               v-model.number="sellFeePercent"
+                               @input="calculate"
+                               step="0.01"
+                               min="0"
+                               max="100"
+                               class="ios-input w-full">
+                        <div class="ios-caption mt-1">Current: {{ sellFeePercent }}%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Available USDT -->
+            <div class="ios-card p-6">
+                <h2 class="text-xl font-semibold text-white mb-4">Available Funds</h2>
+                <div>
+                    <label class="text-gray-400 text-sm mb-2 block">Available USDT</label>
+                    <input type="number" 
+                           v-model.number="availableUSDT"
+                           @input="calculate"
+                           step="0.01"
+                           min="0"
+                           placeholder="Enter USDT amount"
+                           class="ios-input w-full">
+                    <div class="ios-caption mt-2">Used when no specific buy amounts are entered. Current: ${{ formatUSDT(availableUSDT, 2) }}</div>
+                </div>
+            </div>
+
+            <!-- Price Alert -->
+            <div class="ios-card p-6">
+                <h2 class="text-xl font-semibold text-white mb-4">Price Alerts</h2>
+                <div>
+                    <label class="text-gray-400 text-sm mb-2 block">Alert Threshold ($)</label>
+                    <div class="flex gap-3">
+                        <input type="number" 
+                               v-model.number="priceThreshold"
+                               step="100"
+                               min="1"
+                               placeholder="e.g., 500"
+                               class="ios-input flex-1">
+                        <button @click="savePriceThreshold" 
+                                class="ios-button ios-button-primary">
+                            Save Threshold
+                        </button>
+                    </div>
+                    <div class="ios-caption mt-2">Get notified when price crosses multiples of ${{ priceThreshold }}</div>
+                </div>
+            </div>
+
+            <!-- Exchange Rate -->
+            <div class="ios-card p-6">
+                <h2 class="text-xl font-semibold text-white mb-4">Currency</h2>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <div class="text-gray-400 text-sm mb-1">Exchange Rate</div>
+                        <div class="myr-value font-bold text-xl">1 USD = RM {{ formatMYRRate(exchangeRate) }}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="ios-caption">Last updated:</div>
+                        <div class="text-white text-sm">{{ formatLastUpdate(exchangeRateLastUpdate) }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Management -->
+            <div class="ios-card p-6">
+                <h2 class="text-xl font-semibold text-white mb-4">Data Management</h2>
+                <div class="grid grid-cols-3 gap-4">
+                    <button @click="saveData(true)" 
+                            class="ios-button ios-button-success">
+                        💾 Save Configuration
+                    </button>
+                    <button @click="loadData" 
+                            class="ios-button ios-button-primary">
+                        📂 Load Configuration
+                    </button>
+                    <button @click="resetChartData" 
+                            class="ios-button ios-button-danger">
+                        🗑️ Clear Chart Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                                        
+</main>
+
+<!-- iOS Tab Bar -->
+<nav class="ios-tab-bar fixed bottom-0 left-0 right-0 z-50">
+    <div class="flex justify-around py-2">
+        <button @click="activeTab = 'home'" :class="['ios-tab', activeTab === 'home' ? 'active' : '']">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+            <span>Home</span>
+        </button>
+        
+        <button @click="activeTab = 'buy'" :class="['ios-tab', activeTab === 'buy' ? 'active' : '']">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+            </svg>
+            <span>Buy Orders</span>
+        </button>
+        
+        <button @click="activeTab = 'sell'" :class="['ios-tab', activeTab === 'sell' ? 'active' : '']">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+            </svg>
+            <span>Sell Order</span>
+        </button>
+        
+        <button @click="activeTab = 'settings'" :class="['ios-tab', activeTab === 'settings' ? 'active' : '']">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <span>Settings</span>
+        </button>
+    </div>
+</nav>
+    
+
+    
+
+    <!-- Share Modal -->
+    <div v-if="showShareModal" class="ios-modal fixed inset-0 z-50 flex items-center justify-center p-4 fade-in">
+        <div class="ios-modal-content w-full max-w-sm slide-up">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold text-white">Share Configuration</h3>
+                    <button @click="closeShareModal" class="text-gray-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="bg-white p-4 rounded-lg flex justify-center">
+                    <div id="qrcode"></div>
+                </div>
+                <p class="text-center text-gray-400 mt-4 text-sm">
+                    Scan this code to import configuration
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scanner Modal -->
+    <div v-if="showScannerModal" class="ios-modal fixed inset-0 z-50 flex items-center justify-center p-4 fade-in">
+        <div class="ios-modal-content w-full max-w-md slide-up">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold text-white">Scan QR Code</h3>
+                    <button @click="closeScannerModal" class="text-gray-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <div id="qrScannerContainer" class="rounded-lg overflow-hidden bg-black"></div>
+                <p class="text-center text-gray-400 mt-4 text-sm">{{ scannerStatus }}</p>
+            </div>
+        </div>
+    </div>
+                                        
+
+                                        
+</div>
+                                        
+                                        
+
+<script>
+const { createApp } = Vue;
+
+const COIN_CONFIG = {
+    ETH: { id: 'ETH', apiSymbol: 'ETHUSDT', displayName: 'ETH', pricePrecision: 2, amountPrecision: 10 },
+    BTC: { id: 'BTC', apiSymbol: 'BTCUSDT', displayName: 'BTC', pricePrecision: 2, amountPrecision: 8 }
+};
+
+const TIME_RANGES = {
+    '5m': { ms: 5 * 60 * 1000, label: '5 minutes', unit: 'second' },
+    '15m': { ms: 15 * 60 * 1000, label: '15 minutes', unit: 'minute' },
+    '30m': { ms: 30 * 60 * 1000, label: '30 minutes', unit: 'minute' },
+    '1h': { ms: 60 * 60 * 1000, label: '1 hour', unit: 'minute' },
+    '4h': { ms: 4 * 60 * 60 * 1000, label: '4 hours', unit: 'hour' },
+    '12h': { ms: 12 * 60 * 60 * 1000, label: '12 hours', unit: 'hour' },
+    '1d': { ms: 24 * 60 * 60 * 1000, label: '1 day', unit: 'hour' },
+    '3d': { ms: 3 * 24 * 60 * 60 * 1000, label: '3 days', unit: 'day' },
+    '5d': { ms: 5 * 24 * 60 * 60 * 1000, label: '5 days', unit: 'day' },
+    '7d': { ms: 7 * 24 * 60 * 60 * 1000, label: '7 days', unit: 'day' }
+};
+
+createApp({
+data() {
+    return {
+    
+    activeTab: 'home', 
+    
+    
+        // Views
+        currentView: 'calculator',
+        
+        // Coins
+        coins: ['ETH', 'BTC'],
+        selectedCoin: 'ETH',
+        currentPrice: null,
+        previousPrice: null,
+        
+        // Market Pressure
+        buyPressure: 0,
+        sellPressure: 0,
+        buyVolume: 0,
+        sellVolume: 0,
+        
+        // Buy configuration
+        buyEntries: [],
+        nextBuyEntryId: 1,
+        useRealTimeBuy: false,
+        showBuySection: true,
+        
+        // Sell configuration
+        sellPrice: 0,
+        useRealTimeSell: true,
+        
+        // Settings
+        availableUSDT: 0.00,
+        buyFeePercent: 0.1,
+        sellFeePercent: 0.1,
+        priceThreshold: 500,
+        
+        isInitialLoad: true,
+        
+        // Currency
+        exchangeRate: null,
+        exchangeRateLastUpdate: null,
+            
+            // Chart
+            chartDataPoints: [],
+            selectedTimeRange: '5m',
+            latestProfitUSDTForChart: 0,
+            
+            // UI State
+            showShareModal: false,
+            showScannerModal: false,
+            scannerStatus: 'Initializing camera...',
+            
+            // Database
+            db: null,
+            
+            // Timers
+            priceUpdateInterval: null,
+            exchangeRateUpdateInterval: null,
+            chartUpdateTimer: null,
+    saveDebounceTimer: null,
+            
+            // QR
+            qrScanner: null,
+            qrCodeInstance: null,
+            
+            // Price threshold tracking
+            lastPriceThreshold: null,
+            
+            // Calculations
+            calculations: {
+                avgPrice: 0,
+                totalUsdtSpent: 0,
+                totalBuyFeeUSDT: 0,
+                totalCoinsAcquired: 0,
+                totalUsdtBeforeFee: 0,
+                totalCoinsBeforeFee: 0,
+                coinOnHandSellValue: 0,
+                sellFeeUSDT: 0,
+                finalUSDT: 0,
+                profitUSDT: null,
+                profitPercent: 0,
+                totalCostIncludingFees: 0
+            }
+        };
+    },
+    
+    created() {
+        this.profitChart = null;
+        this.profitChartMobile = null;
+    },
+    
+    computed: {
+        showAveragePrice() {
+            return this.buyEntries.some(e => parseFloat(e.usdt) > 0) && this.calculations.totalUsdtBeforeFee > 0;
+        },
+        
+        documentTitle() {
+            let title = '';
+            
+            if (this.calculations.profitUSDT !== null && this.calculations.profitUSDT !== undefined && this.exchangeRate) {
+                const profitMYR = this.calculations.profitUSDT * this.exchangeRate;
+                
+                if (profitMYR > 0) {
+                    title += `[+RM${profitMYR.toFixed(2)}] `;
+                } else if (profitMYR < 0) {
+                    title += `[-RM${Math.abs(profitMYR).toFixed(2)}] `;
+                } else {
+                    title += `[RM0.00] `;
+                }
+            }
+            
+            if (this.currentPrice) {
+                title += `${this.currentPrice.toFixed(2)}`;
+            } else {
+                title += 'Crypto Profit Calculator';
+            }
+            
+            return title;
+        }
+    },
+    
+    watch: {
+        documentTitle(newTitle) {
+            document.title = newTitle;
+        }
+    },
+    
+    methods: {
+    
+    animateValueChange(element) {
+    if (!element) return;
+    
+    const currentText = element.textContent;
+    const previousText = element.dataset.previousValue || currentText;
+    
+    // Store current value for next comparison
+    element.dataset.previousValue = currentText;
+    
+    // If values are the same, no animation needed
+    if (currentText === previousText) return;
+    
+    // Clear existing content
+    element.innerHTML = '';
+    
+    // Compare character by character and wrap each in a span
+    for (let i = 0; i < currentText.length; i++) {
+        const currentChar = currentText[i];
+        const previousChar = i < previousText.length ? previousText[i] : '';
+        
+        const span = document.createElement('span');
+        span.className = 'digit';
+        
+        // Preserve spaces by using &nbsp; or regular space
+        if (currentChar === ' ') {
+            span.innerHTML = '&nbsp;';
+        } else {
+            span.textContent = currentChar;
+        }
+        
+        // Only animate if the character actually changed
+        if (currentChar !== previousChar) {
+            span.classList.add('digit-changed');
+            // Remove animation class after animation completes
+            setTimeout(() => {
+    span.classList.remove('digit-changed');
+}, 350); // Match the animation duration
+        }
+        
+        element.appendChild(span);
+    }
+},
+    
+        formatPrice(price) {
+            if (!price) return '$--.--';
+            return `$${parseFloat(price).toFixed(COIN_CONFIG[this.selectedCoin].pricePrecision)}`;
+        },
+        
+        formatUSDT(amount, decimals = 8) {
+    if (amount === null || amount === undefined || isNaN(amount)) return '0.' + '0'.repeat(decimals);
+    return `${parseFloat(amount).toFixed(decimals)}`;
+},
+        
+        formatMYR(usdtAmount, decimals = 8) {
+    if (!this.exchangeRate || !usdtAmount || isNaN(usdtAmount)) return '0.' + '0'.repeat(decimals);
+    const myrAmount = usdtAmount * this.exchangeRate;
+    return myrAmount.toFixed(decimals);
+},
+        
+        formatMYRRate(rate) {
+            if (!rate || isNaN(rate)) return '0.00';
+            return parseFloat(rate).toFixed(2);
+        },
+        
+        formatLastUpdate(timestamp) {
+            if (!timestamp) return '';
+            const now = Date.now();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            
+            if (minutes < 1) return 'just now';
+            if (minutes === 1) return '1 min ago';
+            if (minutes < 60) return `${minutes} mins ago`;
+            
+            const hours = Math.floor(minutes / 60);
+            if (hours === 1) return '1 hr ago';
+            return `${hours} hrs ago`;
+        },
+        
+        toggleBuySection() {
+            this.showBuySection = !this.showBuySection;
+        },
+        
+        
+        
+        async selectCoin(coin) {
+    // Save current coin's data before switching
+    if (this.selectedCoin && this.db) {
+        await this.saveData(false);
+    }
+    
+    this.selectedCoin = coin;
+    this.currentPrice = null;
+    this.previousPrice = null;
+    this.lastPriceThreshold = null;
+    
+    // Save selected tab to IndexedDB
+    if (this.db) {
+        try {
+            const transaction = this.db.transaction(['generalSettings'], 'readwrite');
+            const store = transaction.objectStore('generalSettings');
+            store.put({ id: 'selectedTab', coin: coin });
+        } catch (error) {
+            console.error('Error saving selected tab:', error);
+        }
+    }
+    
+    // Load the new coin's data
+    await this.loadDataFromDB();
+    await this.fetchCoinPrice();
+    await this.updateChartForTimeRange();
+},
+        
+        addBuyEntry(price = null, usdt = null) {
+            const entry = {
+                id: this.nextBuyEntryId++,
+                price: price || (this.currentPrice ? this.currentPrice.toFixed(COIN_CONFIG[this.selectedCoin].pricePrecision) : ''),
+                usdt: usdt || ''
+            };
+            this.buyEntries.push(entry);
+            this.calculate();
+        },
+        
+        removeBuyEntry(id) {
+            this.buyEntries = this.buyEntries.filter(e => e.id !== id);
+            if (this.buyEntries.length === 0) this.addBuyEntry();
+            this.calculate();
+        },
+        
+        toggleRealTimeBuy() {
+            this.useRealTimeBuy = !this.useRealTimeBuy;
+            if (this.useRealTimeBuy && this.currentPrice) {
+                this.buyEntries.forEach(entry => {
+                    entry.price = this.currentPrice.toFixed(COIN_CONFIG[this.selectedCoin].pricePrecision);
+                });
+            }
+        },
+        
+        toggleRealTimeSell() {
+            this.useRealTimeSell = !this.useRealTimeSell;
+            if (this.useRealTimeSell && this.currentPrice) {
+                this.sellPrice = this.currentPrice;
+            }
+        },
+        
+        async savePriceThreshold() {
+            if (this.db) {
+                try {
+                    const transaction = this.db.transaction(['generalSettings'], 'readwrite');
+                    const store = transaction.objectStore('generalSettings');
+                    store.put({ id: 'priceThreshold', value: this.priceThreshold });
+                    
+                    // Reset the last threshold to trigger new notifications
+                    this.lastPriceThreshold = null;
+                    
+                    this.showNotification(`Threshold set to $${this.priceThreshold}`, 'info');
+                } catch (error) {
+                    console.error('Error saving price threshold:', error);
+                }
+            }
+        },
+        
+        async loadPriceThreshold() {
+            if (!this.db) return;
+            
+            try {
+                const transaction = this.db.transaction(['generalSettings'], 'readonly');
+                const store = transaction.objectStore('generalSettings');
+                
+                return new Promise((resolve) => {
+                    const request = store.get('priceThreshold');
+                    request.onsuccess = (event) => {
+                        const data = event.target.result;
+                        if (data && data.value) {
+                            this.priceThreshold = data.value;
+                        }
+                        resolve();
+                    };
+                    request.onerror = () => resolve();
+                });
+            } catch (error) {
+                console.error('Error loading price threshold:', error);
+            }
+        },
+        
+        async fetchExchangeRate() {
+    try {
+        // Try multiple exchange rate APIs
+        const apis = [
+            {
+                url: 'https://api.exchangerate-api.com/v4/latest/USD',
+                parse: (data) => data.rates.MYR
+            },
+            {
+                url: 'https://open.er-api.com/v6/latest/USD',
+                parse: (data) => data.rates.MYR
+            },
+            {
+                url: 'https://api.exchangerate.host/latest?base=USD&symbols=MYR',
+                parse: (data) => data.rates.MYR
+            }
+        ];
+
+        for (const api of apis) {
+            try {
+                const response = await fetch(api.url);
+                const data = await response.json();
+                const rate = api.parse(data);
+                
+                if (rate && !isNaN(rate)) {
+                    this.exchangeRate = rate;
+                    this.exchangeRateLastUpdate = Date.now();
+                    
+                    // Save to IndexedDB
+                    if (this.db) {
+                        try {
+                            const transaction = this.db.transaction(['generalSettings'], 'readwrite');
+                            const store = transaction.objectStore('generalSettings');
+                            store.put({ 
+                                id: 'exchangeRate', 
+                                rate: this.exchangeRate,
+                                lastUpdate: this.exchangeRateLastUpdate 
+                            });
+                        } catch (error) {
+                            console.error('Error saving exchange rate:', error);
+                        }
+                    }
+                    return; // Success, exit
+                }
+            } catch (error) {
+                console.warn(`Failed to fetch from ${api.url}:`, error.message);
+            }
+        }
+        
+        // All APIs failed
+        throw new Error('All exchange rate APIs failed');
+    } catch (error) {
+        console.error('Failed to fetch exchange rate:', error);
+        if (!this.exchangeRate) {
+            this.exchangeRate = 4.47; // Fallback rate
+            this.exchangeRateLastUpdate = Date.now();
+        }
+    }
+},
+        
+        checkPriceThresholdCrossing() {
+            if (this.previousPrice === null || this.currentPrice === null) {
+                // Initialize the threshold on first price fetch
+                this.lastPriceThreshold = Math.floor(this.currentPrice / this.priceThreshold) * this.priceThreshold;
+                return;
+            }
+            
+            const currentThreshold = Math.floor(this.currentPrice / this.priceThreshold) * this.priceThreshold;
+            const previousThreshold = Math.floor(this.previousPrice / this.priceThreshold) * this.priceThreshold;
+            
+            // Check if we crossed a threshold
+            if (currentThreshold !== previousThreshold) {
+                // Determine direction and which threshold was crossed
+                if (this.currentPrice > this.previousPrice) {
+                    // Price going up - crossed upward
+                    const crossedThreshold = currentThreshold;
+                    this.showPriceThresholdToast(crossedThreshold, 'up');
+                } else {
+                    // Price going down - crossed downward
+                    const crossedThreshold = previousThreshold;
+                    this.showPriceThresholdToast(crossedThreshold, 'down');
+                }
+                
+                this.lastPriceThreshold = currentThreshold;
+            }
+        },
+        
+        showPriceThresholdToast(threshold, direction) {
+    const message = `$${threshold.toLocaleString()}`;
+    const type = direction === 'up' ? 'success' : 'danger';
+    const arrow = direction === 'up' ? '↑' : '↓';
+    
+    // Show larger, more prominent notification with longer duration
+    this.showNotification(`${arrow} ${message} ${arrow}`, type, 3000);
+    
+    // More prominent vibration patterns
+    if (navigator.vibrate) {
+        if (direction === 'up') {
+            navigator.vibrate([100, 50, 100, 50, 100]); // Triple pulse for up
+        } else {
+            navigator.vibrate([200, 100, 200]); // Double long pulse for down
+        }
+    }
+    
+    // Play audio notification if desired
+    this.playNotificationSound(direction);
+},
+
+playNotificationSound(direction) {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Different tones for up vs down
+        oscillator.frequency.value = direction === 'up' ? 800 : 400;
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+    } catch (error) {
+        // Silent fail if audio not supported
+    }
+},
+        
+        async fetchCoinPrice() {
+    // Fetch exchange rate if not available or older than 30 minutes
+    if (!this.exchangeRate || !this.exchangeRateLastUpdate || 
+        (Date.now() - this.exchangeRateLastUpdate) > 30 * 60 * 1000) {
+        await this.fetchExchangeRate();
+    }
+    
+    const coinApiSymbol = COIN_CONFIG[this.selectedCoin].apiSymbol;
+
+    const endpoints = [
+        `https://data-api.binance.vision/api/v3/ticker/24hr?symbol=${coinApiSymbol}`,
+        `https://api.binance.com/api/v3/ticker/24hr?symbol=${coinApiSymbol}`,
+        `https://api.binance.us/api/v3/ticker/24hr?symbol=${coinApiSymbol}`,
+        `https://api1.binance.com/api/v3/ticker/24hr?symbol=${coinApiSymbol}`,
+        `https://api2.binance.com/api/v3/ticker/24hr?symbol=${coinApiSymbol}`
+    ];
+
+    for (const endpoint of endpoints) {
+        try {
+            const response = await fetch(endpoint, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                },
+                cache: 'no-cache'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data && data.lastPrice && !isNaN(parseFloat(data.lastPrice))) {
+                this.previousPrice = this.currentPrice;
+                this.currentPrice = parseFloat(data.lastPrice);
+                
+                // Animate only changed digits in price
+                this.$nextTick(() => {
+                    const priceElements = document.querySelectorAll('.price-ticker');
+                    priceElements.forEach(el => this.animateValueChange(el));
+                });
+                
+                // Fetch real buy/sell pressure from order book
+                await this.fetchOrderBookPressure();
+                
+                // Check for threshold crossings
+                this.checkPriceThresholdCrossing();
+                
+                if (this.useRealTimeBuy) {
+                    this.buyEntries.forEach(entry => {
+                        entry.price = this.currentPrice.toFixed(COIN_CONFIG[this.selectedCoin].pricePrecision);
+                    });
+                }
+                
+                if (this.useRealTimeSell) {
+                    this.sellPrice = this.currentPrice;
+                }
+                
+                this.calculate();
+                this.updateChart();
+                
+                document.title = this.documentTitle;
+                
+                return;
+            }
+        } catch (error) {
+            console.warn(`Failed to fetch from ${endpoint}:`, error.message);
+        }
+    }
+
+    console.error('All price fetch attempts failed');
+},
+    
+    async fetchOrderBookPressure() {
+    const coinApiSymbol = COIN_CONFIG[this.selectedCoin].apiSymbol;
+    
+    const endpoints = [
+        `https://data-api.binance.vision/api/v3/depth?symbol=${coinApiSymbol}&limit=100`,
+        `https://api.binance.com/api/v3/depth?symbol=${coinApiSymbol}&limit=100`,
+        `https://api.binance.us/api/v3/depth?symbol=${coinApiSymbol}&limit=100`
+    ];
+    
+    for (const endpoint of endpoints) {
+        try {
+            const response = await fetch(endpoint, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' },
+                cache: 'no-cache'
+            });
+            
+            if (!response.ok) continue;
+            
+            const data = await response.json();
+            
+            if (data.bids && data.asks) {
+                // Calculate total bid volume (buy pressure)
+                const bidVolume = data.bids.reduce((sum, bid) => {
+                    return sum + (parseFloat(bid[0]) * parseFloat(bid[1]));
+                }, 0);
+                
+                // Calculate total ask volume (sell pressure)
+                const askVolume = data.asks.reduce((sum, ask) => {
+                    return sum + (parseFloat(ask[0]) * parseFloat(ask[1]));
+                }, 0);
+                
+                const totalVolume = bidVolume + askVolume;
+                
+                if (totalVolume > 0) {
+                    this.buyPressure = (bidVolume / totalVolume) * 100;
+                    this.sellPressure = (askVolume / totalVolume) * 100;
+                    this.buyVolume = bidVolume;
+                    this.sellVolume = askVolume;
+                }
+                
+                return; // Success
+            }
+        } catch (error) {
+            console.warn(`Failed to fetch order book from ${endpoint}:`, error.message);
+        }
+    }
+    
+    // Fallback if all endpoints fail
+    console.error('All order book fetch attempts failed');
+},
+        
+        calculate(autoSave = true) {
+    const config = COIN_CONFIG[this.selectedCoin];
+    let totalCoinsAcquired = 0, totalUsdtSpent = 0, totalBuyFeeUSDT = 0;
+    let totalUsdtBeforeFee = 0, totalCoinsBeforeFee = 0;
+    let avgBuyPrice = 0;
+    let totalCostIncludingFees = 0;
+    
+    const hasSpecificAmounts = this.buyEntries.some(entry => parseFloat(entry.usdt) > 0);
+    
+    // Store per-entry calculations
+    this.buyEntries.forEach(entry => {
+        entry.calculatedFee = 0;
+        entry.calculatedCoins = 0;
+        entry.calculatedCoinsAfterFee = 0;
+    });
+    
+    if (hasSpecificAmounts) {
+        let totalWeightedPrice = 0;
+        let totalCoinsForAvg = 0;
+        
+        this.buyEntries.forEach((entry) => {
+            const price = parseFloat(entry.price) || 0;
+            const usdtForThisEntry = parseFloat(entry.usdt) || 0;
+            if (price > 0 && usdtForThisEntry > 0) {
+                const coinsFromEntry = usdtForThisEntry / price;
+                const buyFeeInCoins = coinsFromEntry * (this.buyFeePercent / 100);
+                const coinsAfterFee = coinsFromEntry - buyFeeInCoins;
+                const buyFeeForEntry = buyFeeInCoins * price;
+
+                // Store per-entry calculations
+                entry.calculatedFee = buyFeeForEntry;
+                entry.calculatedCoins = coinsFromEntry;
+                entry.calculatedCoinsAfterFee = coinsAfterFee;
+
+                totalUsdtSpent += usdtForThisEntry;
+                totalBuyFeeUSDT += buyFeeForEntry;
+                totalCoinsAcquired += coinsAfterFee;
+                totalUsdtBeforeFee += usdtForThisEntry;
+                totalCoinsBeforeFee += coinsFromEntry;
+                
+                totalWeightedPrice += (price * coinsFromEntry);
+                totalCoinsForAvg += coinsFromEntry;
+            }
+        });
+        
+        avgBuyPrice = totalCoinsForAvg > 0 ? totalWeightedPrice / totalCoinsForAvg : 0;
+        totalCostIncludingFees = totalUsdtSpent;
+    } else {
+        const validPrices = this.buyEntries.filter(e => parseFloat(e.price) > 0).map(e => parseFloat(e.price));
+        if (validPrices.length > 0) {
+            avgBuyPrice = validPrices.reduce((a, b) => a + b, 0) / validPrices.length;
+            if (avgBuyPrice > 0 && this.availableUSDT > 0) {
+                totalUsdtSpent = this.availableUSDT;
+                const coinsBeforeFee = this.availableUSDT / avgBuyPrice;
+                const buyFeeInCoins = coinsBeforeFee * (this.buyFeePercent / 100);
+                totalCoinsAcquired = coinsBeforeFee - buyFeeInCoins;
+                totalBuyFeeUSDT = buyFeeInCoins * avgBuyPrice;
+                totalUsdtBeforeFee = this.availableUSDT;
+                totalCoinsBeforeFee = coinsBeforeFee;
+                totalCostIncludingFees = this.availableUSDT;
+            }
+        }
+    }
+            
+    const currentSellPrice = parseFloat(this.sellPrice) || 0;
+    const coinOnHandSellValue = totalCoinsAcquired * currentSellPrice;
+    const sellFeeUSDT = coinOnHandSellValue * (this.sellFeePercent / 100);
+    const finalUSDT = coinOnHandSellValue - sellFeeUSDT;
+    
+    let profitUSDT = totalCostIncludingFees > 0 ? finalUSDT - totalCostIncludingFees : 0;
+    let profitPercent = totalCostIncludingFees > 0 ? (profitUSDT / totalCostIncludingFees) * 100 : 0;
+    
+    this.latestProfitUSDTForChart = profitUSDT;
+    
+    this.calculations = {
+        avgPrice: avgBuyPrice,
+        totalUsdtSpent,
+        totalBuyFeeUSDT,
+        totalCoinsAcquired,
+        totalUsdtBeforeFee,
+        totalCoinsBeforeFee,
+        coinOnHandSellValue,
+        sellFeeUSDT,
+        finalUSDT,
+        profitUSDT,
+        profitPercent,
+        totalCostIncludingFees
+    };
+
+    // Always auto-save after initial load is complete
+    if (!this.isInitialLoad) {
+        // Debounce save to avoid too frequent writes
+        if (this.saveDebounceTimer) {
+            clearTimeout(this.saveDebounceTimer);
+        }
+        this.saveDebounceTimer = setTimeout(() => {
+            this.saveData(false);
+        }, 500); // Save 500ms after last change
+    }
+    
+    // Animate only changed digits
+    this.$nextTick(() => {
+        const valuesToAnimate = document.querySelectorAll('.result-value, .profit-value, .loss-value, .myr-value, .price-ticker');
+        valuesToAnimate.forEach(el => {
+            this.animateValueChange(el);
+        });
+    });
+},
+
+        
+        initChart() {
+            const ctx = document.getElementById('profitChart');
+            if (ctx) {
+                this.profitChart = this.createChartInstance(ctx);
+            }
+            
+            const ctxMobile = document.getElementById('profitChartMobile');
+            if (ctxMobile) {
+                this.profitChartMobile = this.createChartInstance(ctxMobile);
+            }
+        },
+        
+createChartInstance(ctx) {
+    const vm = this; // Store reference to Vue instance
+    
+    return new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Net Profit',
+                data: [],
+                borderColor: '#0A84FF',
+                backgroundColor: 'transparent',
+                fill: false,
+                tension: 0.2,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                pointBackgroundColor: function(context) {
+                    const value = context.parsed ? context.parsed.y : 0;
+                    return value >= 0 ? '#30D158' : '#FF453A';
+                },
+                pointBorderColor: function(context) {
+                    const value = context.parsed ? context.parsed.y : 0;
+                    return value >= 0 ? '#30D158' : '#FF453A';
+                },
+                segment: {
+                    borderColor: function(context) {
+                        const startValue = context.p0.parsed.y;
+                        const endValue = context.p1.parsed.y;
+                        
+                        if (startValue >= 0 && endValue >= 0) {
+                            return '#30D158';
+                        } else if (startValue < 0 && endValue < 0) {
+                            return '#FF453A';
+                        } else {
+                            return '#8E8E93';
+                        }
+                    },
+                    borderWidth: 2
+                }
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    type: 'time',
+                    time: { 
+                        unit: 'second', 
+                        tooltipFormat: 'HH:mm:ss', 
+                        displayFormats: { 
+                            second: 'HH:mm:ss',
+                            minute: 'HH:mm', 
+                            hour: 'HH:mm', 
+                            day: 'MMM dd' 
+                        }
+                    },
+                    grid: { 
+                        color: '#38383A',
+                        borderColor: '#38383A',
+                        display: true
+                    },
+                    ticks: { 
+                        font: { 
+                            size: window.innerWidth < 640 ? 9 : 11 
+                        }, 
+                        color: '#8E8E93',
+                        maxTicksLimit: window.innerWidth < 640 ? 5 : 8
+                    }
+                },
+                y: {
+                    ticks: { 
+                        callback: function(value) {
+                            return '$' + value.toFixed(window.innerWidth < 640 ? 0 : 2);
+                        },
+                        color: function(context) {
+                            const value = context.tick.value;
+                            if (value > 0) return '#30D158';
+                            if (value < 0) return '#FF453A';
+                            return '#8E8E93';
+                        },
+                        font: { 
+                            size: window.innerWidth < 640 ? 9 : 11
+                        },
+                        maxTicksLimit: window.innerWidth < 640 ? 5 : 8
+                    },
+                    grid: {
+                        color: function(context) {
+                            if (context.tick.value === 0) {
+                                return 'rgba(142, 142, 147, 0.5)';
+                            }
+                            return '#38383A';
+                        },
+                        borderColor: '#38383A',
+                        lineWidth: function(context) {
+                            if (context.tick.value === 0) {
+                                return 2;
+                            }
+                            return 0.5;
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: { 
+                    display: false 
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(44, 44, 46, 0.95)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: '#48484A',
+                    borderWidth: 0.5,
+                    cornerRadius: 10,
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        title: function(context) {
+                            const date = new Date(context[0].parsed.x);
+                            return date.toLocaleString();
+                        },
+                        beforeBody: function(context) {
+                            if (vm.currentPrice) {
+                                return vm.selectedCoin + ' Price: $' + vm.currentPrice.toFixed(COIN_CONFIG[vm.selectedCoin].pricePrecision);
+                            }
+                            return '';
+                        },
+                        label: function(context) {
+                            const profit = context.parsed.y;
+                            const profitText = profit >= 0 ? 'Profit: $' : 'Loss: $';
+                            return profitText + Math.abs(profit).toFixed(2);
+                        },
+                        afterLabel: function(context) {
+                            if (vm.exchangeRate) {
+                                const profit = context.parsed.y;
+                                const myrValue = profit * vm.exchangeRate;
+                                const myrText = profit >= 0 ? '+RM ' : '-RM ';
+                                return myrText + Math.abs(myrValue).toFixed(2);
+                            }
+                            return '';
+                        },
+                        labelTextColor: function(context) {
+                            const profit = context.parsed.y;
+                            return profit >= 0 ? '#30D158' : '#FF453A';
+                        },
+                        afterLabelTextColor: function(context) {
+                            return '#FF9F0A';
+                        }
+                    }
+                }
+            },
+            animation: { 
+                duration: 200 
+            },
+            interaction: { 
+                mode: 'nearest', 
+                axis: 'x', 
+                intersect: false 
+            }
+        }
+    });
+},
+        
+        async updateChart() {
+            const charts = [this.profitChart, this.profitChartMobile].filter(chart => chart !== null);
+            if (charts.length === 0) return;
+            
+            const now = Date.now();
+            
+            if (!isNaN(this.latestProfitUSDTForChart)) {
+                this.chartDataPoints.push({ x: now, y: this.latestProfitUSDTForChart });
+                
+                if (this.db) {
+                    try {
+                        const storeName = `priceHistory_${this.selectedCoin}`;
+                        const transaction = this.db.transaction([storeName], 'readwrite');
+                        const store = transaction.objectStore(storeName);
+                        store.put({ timestamp: now, profit: this.latestProfitUSDTForChart });
+                    } catch (error) {
+                        console.error('Error saving price history:', error);
+                    }
+                }
+                
+                const maxCutoffTime = now - TIME_RANGES['7d'].ms;
+                this.chartDataPoints = this.chartDataPoints.filter(point => point.x >= maxCutoffTime);
+                
+                if (this.chartUpdateTimer) clearTimeout(this.chartUpdateTimer);
+                
+                this.chartUpdateTimer = setTimeout(() => {
+                    this.updateChartDisplay();
+                }, 50);
+            }
+        },
+        
+        async updateChartDisplay() {
+            const charts = [this.profitChart, this.profitChartMobile].filter(chart => chart !== null);
+            if (charts.length === 0) return;
+            
+            const now = Date.now();
+            const cutoffTime = now - TIME_RANGES[this.selectedTimeRange].ms;
+            
+            let dataToDisplay = [];
+            
+            if (['5m', '15m', '30m', '1h'].includes(this.selectedTimeRange)) {
+                const filteredData = this.chartDataPoints.filter(point => point.x >= cutoffTime);
+                
+                if (filteredData.length === 0 || (filteredData.length > 0 && (now - filteredData[0].x) < TIME_RANGES[this.selectedTimeRange].ms * 0.8)) {
+                    const historicalData = await this.loadHistoricalData(this.selectedCoin, TIME_RANGES[this.selectedTimeRange].ms);
+                    const allData = [...historicalData, ...filteredData];
+                    
+                    allData.sort((a, b) => a.x - b.x);
+                    const uniqueData = [];
+                    let lastTimestamp = 0;
+                    
+                    for (const point of allData) {
+                        if (point.x - lastTimestamp >= 500) {
+                            uniqueData.push(point);
+                            lastTimestamp = point.x;
+                        }
+                    }
+                    
+                    dataToDisplay = uniqueData.filter(point => point.x >= cutoffTime);
+                } else {
+                    dataToDisplay = filteredData;
+                }
+            } else {
+                const historicalData = await this.loadHistoricalData(this.selectedCoin, TIME_RANGES[this.selectedTimeRange].ms);
+                const sessionData = this.chartDataPoints.filter(point => point.x >= cutoffTime);
+                
+                const allData = [...historicalData, ...sessionData];
+                allData.sort((a, b) => a.x - b.x);
+                
+                const uniqueData = [];
+                let lastTimestamp = 0;
+                
+                for (const point of allData) {
+                    if (point.x - lastTimestamp >= 500) {
+                        uniqueData.push(point);
+                        lastTimestamp = point.x;
+                    }
+                }
+                
+                dataToDisplay = uniqueData;
+            }
+            
+            charts.forEach(chart => {
+                if (chart && chart.data) {
+                    chart.data.datasets[0].data = dataToDisplay;
+                    chart.update('none');
+                }
+            });
+        },
+        
+        async updateChartForTimeRange() {
+    const charts = [this.profitChart, this.profitChartMobile].filter(chart => chart !== null);
+    if (charts.length === 0) return;
+    
+    const timeRange = TIME_RANGES[this.selectedTimeRange];
+    
+    charts.forEach(chart => {
+        if (chart && chart.options) {
+            chart.options.scales.x.time.unit = timeRange.unit;
+        }
+    });
+    
+    // Save selected time range to IndexedDB
+    if (this.db) {
+        try {
+            const transaction = this.db.transaction(['generalSettings'], 'readwrite');
+            const store = transaction.objectStore('generalSettings');
+            store.put({ id: 'selectedTimeRange', value: this.selectedTimeRange });
+        } catch (error) {
+            console.error('Error saving time range:', error);
+        }
+    }
+    
+    await this.updateChartDisplay();
+},
+    
+    async loadSavedTimeRange() {
+    if (!this.db) return;
+    
+    try {
+        const transaction = this.db.transaction(['generalSettings'], 'readonly');
+        const store = transaction.objectStore('generalSettings');
+        
+        return new Promise((resolve) => {
+            const request = store.get('selectedTimeRange');
+            request.onsuccess = (event) => {
+                const data = event.target.result;
+                if (data && data.value && TIME_RANGES[data.value]) {
+                    this.selectedTimeRange = data.value;
+                }
+                resolve();
+            };
+            request.onerror = () => resolve();
+        });
+    } catch (error) {
+        console.error('Error loading saved time range:', error);
+    }
+},
+        
+        async resetChartData() {
+            const charts = [this.profitChart, this.profitChartMobile].filter(chart => chart !== null);
+            if (charts.length === 0 || !this.db) return;
+            
+            this.chartDataPoints = [];
+            
+            try {
+                const storeName = `priceHistory_${this.selectedCoin}`;
+                const transaction = this.db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
+                await new Promise((resolve, reject) => {
+                    const clearRequest = store.clear();
+                    clearRequest.onsuccess = () => resolve();
+                    clearRequest.onerror = (event) => reject(event.target.error);
+                });
+            } catch (error) {
+                console.error(`Error clearing historical data for ${this.selectedCoin}:`, error);
+            }
+            
+            await this.updateChartForTimeRange();
+        },
+        
+        async openDB() {
+            return new Promise((resolve, reject) => {
+                if (this.db) { resolve(this.db); return; }
+                
+                const request = indexedDB.open('cryptoProfitCalculatorDB_v3', 3);
+                
+                request.onsuccess = (event) => {
+                    this.db = event.target.result;
+                    resolve(this.db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    let db = event.target.result;
+                    
+                    if (!db.objectStoreNames.contains('generalSettings')) {
+                        db.createObjectStore('generalSettings', { keyPath: 'id' });
+                    }
+                    
+                    Object.keys(COIN_CONFIG).forEach(coinKey => {
+                        const storeName = `settings_${coinKey}`;
+                        if (!db.objectStoreNames.contains(storeName)) {
+                            db.createObjectStore(storeName, { keyPath: 'id' });
+                        }
+                        
+                        const priceHistoryStore = `priceHistory_${coinKey}`;
+                        if (!db.objectStoreNames.contains(priceHistoryStore)) {
+                            const store = db.createObjectStore(priceHistoryStore, { keyPath: 'timestamp' });
+                            store.createIndex('timestamp', 'timestamp', { unique: true });
+                        }
+                    });
+                };
+                
+                request.onerror = () => reject("Database error");
+            });
+        },
+        
+       async saveData(showNotif = true) {
+    if (!this.db) return;
+    
+    const storeName = `settings_${this.selectedCoin}`;
+    const transaction = this.db.transaction([storeName], 'readwrite');
+    const store = transaction.objectStore(storeName);
+    
+    const dataToSave = {
+    id: 'lastSavedValues',
+    buyEntries: this.buyEntries.map(e => ({ 
+        price: parseFloat(e.price).toFixed(8), 
+        usdt: parseFloat(e.usdt).toFixed(8) 
+    })),
+    usdtInHand: parseFloat(this.availableUSDT).toFixed(8),
+    buyFeePercent: this.buyFeePercent,
+    sellFeePercent: this.sellFeePercent,
+    useRealTimeBuy: this.useRealTimeBuy,
+    useRealTimeSell: this.useRealTimeSell,
+    timestamp: new Date().toISOString()
+};
+    
+    store.put(dataToSave);
+    
+    // Only vibrate on user-initiated saves (when showNotif is true)
+    if (showNotif && window.innerWidth < 640 && navigator.vibrate) {
+        navigator.vibrate(100);
+    }
+    
+    if (showNotif) {
+        this.showNotification(`${this.selectedCoin} configuration saved`, 'info');
+    }
+},
+        
+        async loadData() {
+            await this.loadDataFromDB();
+            if (window.innerWidth < 640 && navigator.vibrate) {
+                navigator.vibrate(100);
+            }
+            this.showNotification(`${this.selectedCoin} configuration loaded`, 'info');
+        },
+        
+        async loadDataFromDB() {
+            if (!this.db) return;
+            
+            const storeName = `settings_${this.selectedCoin}`;
+            const transaction = this.db.transaction([storeName], 'readonly');
+            const store = transaction.objectStore(storeName);
+            
+            return new Promise((resolve) => {
+                const request = store.get('lastSavedValues');
+                request.onsuccess = (event) => {
+                    const data = event.target.result;
+                    if (data) {
+                        this.buyEntries = [];
+                        this.nextBuyEntryId = 1;
+                        data.buyEntries.forEach(entry => this.addBuyEntry(entry.price, entry.usdt));
+                        
+                        this.availableUSDT = data.usdtInHand;
+                        this.buyFeePercent = data.buyFeePercent;
+                        this.sellFeePercent = data.sellFeePercent;
+                        this.useRealTimeBuy = data.useRealTimeBuy;
+this.useRealTimeSell = data.useRealTimeSell;
+
+// Don't trigger auto-save during load
+this.calculate(false);
+                    }
+                    resolve();
+                };
+            });
+        },
+        
+        async loadHistoricalData(coin, timeRangeMs) {
+            if (!this.db) return [];
+            
+            try {
+                const storeName = `priceHistory_${coin}`;
+                const transaction = this.db.transaction([storeName], 'readonly');
+                const store = transaction.objectStore(storeName);
+                const index = store.index('timestamp');
+                
+                const minTimestamp = Date.now() - timeRangeMs;
+                const range = IDBKeyRange.lowerBound(minTimestamp);
+                
+                return new Promise((resolve) => {
+                    const request = index.openCursor(range);
+                    const results = [];
+                    
+                    request.onsuccess = (event) => {
+                        const cursor = event.target.result;
+                        if (cursor) {
+                            results.push({ x: cursor.value.timestamp, y: cursor.value.profit });
+                            cursor.continue();
+                        } else {
+                            resolve(results);
+                        }
+                    };
+                    
+                    request.onerror = () => resolve([]);
+                });
+            } catch (error) {
+                return [];
+            }
+        },
+        
+        shareData() {
+            this.showShareModal = true;
+            this.$nextTick(() => {
+                const shareData = JSON.stringify({
+    c: this.selectedCoin,
+    b: this.buyEntries.map(e => [
+        parseFloat(parseFloat(e.price).toFixed(8)) || 0, 
+        parseFloat(parseFloat(e.usdt).toFixed(8)) || 0
+    ]),
+    u: parseFloat(parseFloat(this.availableUSDT).toFixed(8)),
+    bf: this.buyFeePercent,
+    sf: this.sellFeePercent,
+    rtb: this.useRealTimeBuy,
+    rts: this.useRealTimeSell
+});
+                
+                const qrContainer = document.getElementById('qrcode');
+                qrContainer.innerHTML = '';
+                
+                new QRCode(qrContainer, {
+                    text: shareData,
+                    width: 200,
+                    height: 200,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.L
+                });
+            });
+        },
+        
+        closeShareModal() {
+            this.showShareModal = false;
+        },
+        
+        scanQR() {
+            this.showScannerModal = true;
+            this.scannerStatus = 'Initializing camera...';
+            
+            this.$nextTick(() => {
+                const qrContainer = document.getElementById("qrScannerContainer");
+                qrContainer.innerHTML = '';
+                
+                const video = document.createElement('video');
+                video.style.width = '100%';
+                video.style.height = 'auto';
+                video.style.borderRadius = '8px';
+                qrContainer.appendChild(video);
+                
+                this.qrScanner = new Html5Qrcode("qrScannerContainer");
+                
+                const config = { 
+                    fps: 10, 
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0,
+                    showTorchButtonIfSupported: true,
+                    videoConstraints: {
+                        facingMode: "environment",
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                };
+                
+                Html5Qrcode.getCameras().then(devices => {
+                    if (devices && devices.length) {
+                        let cameraId = devices[0].id;
+                        
+                        for (let device of devices) {
+                            if (device.label.toLowerCase().includes('back') || 
+                                device.label.toLowerCase().includes('rear') ||
+                                device.label.toLowerCase().includes('environment')) {
+                                cameraId = device.id;
+                                break;
+                            }
+                        }
+                        
+                        this.scannerStatus = 'Point camera at QR code';
+                        
+                        this.qrScanner.start(
+                            cameraId,
+                            config,
+                            (decodedText) => {
+                                if (navigator.vibrate) {
+                                    navigator.vibrate(200);
+                                }
+                                this.handleScannedQR(decodedText);
+                            },
+                            (errorMessage) => {
+                                // Silent error handling
+                            }
+                        ).catch(err => {
+                            console.error('Failed to start scanner:', err);
+                            this.scannerStatus = 'Camera access denied or not available';
+                            this.offerFileUploadFallback();
+                        });
+                    } else {
+                        this.scannerStatus = 'No camera found';
+                        this.offerFileUploadFallback();
+                    }
+                }).catch(err => {
+                    console.error('Failed to get cameras:', err);
+                    this.scannerStatus = 'Unable to access camera';
+                    this.offerFileUploadFallback();
+                });
+            });
+        },
+    
+        async loadSavedTab() {
+            if (!this.db) return;
+            
+            try {
+                const transaction = this.db.transaction(['generalSettings'], 'readonly');
+                const store = transaction.objectStore('generalSettings');
+                
+                return new Promise((resolve) => {
+                    const request = store.get('selectedTab');
+                    request.onsuccess = (event) => {
+                        const data = event.target.result;
+                        if (data && data.coin) {
+                            this.selectedCoin = data.coin;
+                        }
+                        resolve();
+                    };
+                    request.onerror = () => resolve();
+                });
+            } catch (error) {
+                console.error('Error loading saved tab:', error);
+            }
+        },
+        
+        async loadSavedExchangeRate() {
+            if (!this.db) return;
+            
+            try {
+                const transaction = this.db.transaction(['generalSettings'], 'readonly');
+                const store = transaction.objectStore('generalSettings');
+                
+                return new Promise((resolve) => {
+                    const request = store.get('exchangeRate');
+                    request.onsuccess = (event) => {
+                        const data = event.target.result;
+                        if (data && data.rate) {
+                            this.exchangeRate = data.rate;
+                            this.exchangeRateLastUpdate = data.lastUpdate || null;
+                        }
+                        resolve();
+                    };
+                    request.onerror = () => resolve();
+                });
+            } catch (error) {
+                console.error('Error loading saved exchange rate:', error);
+            }
+        },
+        
+        offerFileUploadFallback() {
+            const qrContainer = document.getElementById("qrScannerContainer");
+            qrContainer.innerHTML = `
+                <div class="text-center p-4">
+                    <p class="text-gray-400 mb-4 text-sm">Camera not available. Upload a QR code image:</p>
+                    <input type="file" 
+                           accept="image/*" 
+                           id="qrFileInput" 
+                           class="hidden">
+                    <label for="qrFileInput" 
+                           class="ios-button ios-button-primary">
+                        Choose QR Image
+                    </label>
+                </div>
+            `;
+            
+            const fileInput = document.getElementById('qrFileInput');
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    this.scannerStatus = 'Processing image...';
+                    Html5Qrcode.scanFile(file, true)
+                        .then(decodedText => {
+                            this.handleScannedQR(decodedText);
+                        })
+                        .catch(err => {
+                            this.scannerStatus = 'Could not read QR code from image';
+                        });
+                }
+            });
+        },
+        
+        closeScannerModal() {
+            if (this.qrScanner) {
+                this.qrScanner.stop().then(() => {
+                    this.qrScanner.clear();
+                }).catch(err => {
+                    console.error('Error stopping scanner:', err);
+                });
+                this.qrScanner = null;
+            }
+            this.showScannerModal = false;
+            this.scannerStatus = 'Initializing camera...';
+        },
+
+
+        
+        async handleScannedQR(scannedText) {
+    try {
+        const data = JSON.parse(scannedText);
+        
+        // Save current coin's data before switching
+        if (this.selectedCoin && this.db) {
+            await this.saveData(false);
+        }
+        
+        // Switch to the scanned coin
+        this.selectedCoin = data.c;
+        
+        // Save the selected coin to IndexedDB
+        if (this.db) {
+            const transaction = this.db.transaction(['generalSettings'], 'readwrite');
+            const store = transaction.objectStore('generalSettings');
+            store.put({ id: 'selectedTab', coin: data.c });
+        }
+        
+        // Load scanned configuration and display on screen
+        this.buyEntries = [];
+        this.nextBuyEntryId = 1;
+        data.b.forEach(e => this.addBuyEntry(e[0], e[1]));
+        this.availableUSDT = data.u;
+        this.buyFeePercent = data.bf;
+        this.sellFeePercent = data.sf;
+        this.useRealTimeBuy = data.rtb;
+        this.useRealTimeSell = data.rts;
+        
+        this.closeScannerModal();
+        
+        // Calculate with the new data (without auto-save)
+        this.calculate(false);
+        
+        // Save all the data to the correct coin's IndexedDB store
+        await this.saveData(false);
+        
+        // Update price for the new coin
+        await this.fetchCoinPrice();
+        await this.updateChartForTimeRange();
+        
+        if (navigator.vibrate) {
+            navigator.vibrate([100, 50, 100]);
+        }
+        
+        this.showNotification(`${this.selectedCoin} config loaded & saved`, 'success');
+    } catch (error) {
+        this.scannerStatus = 'Invalid QR code';
+        console.error('QR scan error:', error);
+        this.showNotification('Failed to load QR code', 'danger');
+    }
+},
+        
+        showNotification(message, type = 'info', duration = 2000) {
+            const notification = document.createElement('div');
+            notification.className = `toast-notification toast-${type} slide-down`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.remove('slide-down');
+                notification.classList.add('slide-out');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, duration);
+        }
+    },
+    
+    async mounted() {
+    document.body.addEventListener('touchmove', function(e) {
+        if (!e.target.closest('#app')) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    
+    // Open database first
+    await this.openDB();
+    
+    // Load saved settings
+    await this.loadSavedTab();
+    await this.loadSavedExchangeRate();
+    await this.loadPriceThreshold();
+    await this.loadSavedTimeRange(); // Add this line
+    
+    // Load data from DB (this will load buy entries)
+    await this.loadDataFromDB();
+    
+    // Only add a blank entry if no data was loaded
+    if (this.buyEntries.length === 0) {
+        this.addBuyEntry();
+    }
+    
+    this.$nextTick(() => {
+        this.initChart();
+        this.updateChartForTimeRange();
+    });
+    
+    await this.fetchCoinPrice();
+    this.priceUpdateInterval = setInterval(() => {
+        this.fetchCoinPrice();
+    }, 1000);
+    
+    this.exchangeRateUpdateInterval = setInterval(() => {
+        this.fetchExchangeRate();
+    }, 30 * 60 * 1000);
+    
+    this.calculate();
+
+// Mark initial load as complete
+this.isInitialLoad = false;
+
+window.addEventListener('resize', () => {
+        const charts = [this.profitChart, this.profitChartMobile].filter(chart => chart !== null);
+        charts.forEach(chart => {
+            if (chart) {
+                chart.resize();
+            }
+        });
+    });
+    
+    document.title = this.documentTitle;
+},
+    
+    unmounted() {
+        if (this.priceUpdateInterval) {
+            clearInterval(this.priceUpdateInterval);
+        }
+        if (this.exchangeRateUpdateInterval) {
+            clearInterval(this.exchangeRateUpdateInterval);
+        }
+        if (this.chartUpdateTimer) {
+            clearTimeout(this.chartUpdateTimer);
+        }
+    if (this.saveDebounceTimer) {
+    clearTimeout(this.saveDebounceTimer);
+}
+    }
+}).mount('#app');
+</script>
+
+</body>
+</html>
